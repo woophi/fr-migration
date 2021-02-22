@@ -17,6 +17,8 @@ connect("mongodb://localhost:27017/vk-friends", {
   useUnifiedTopology: true,
 });
 
+const limit = 1000;
+
 const insertIntoPGDb = async (quiz: QuizType) => {
   const client = await pool.connect();
   try {
@@ -161,11 +163,9 @@ const insertIntoPGDb = async (quiz: QuizType) => {
   }
 };
 
-const main = async () => {
-  const ad = QuizAnswerModel;
-  const adf = QuizFriendModel;
-  const adq = QuizQuestionModel;
+const batchQuiz = async (offset: number) => {
   const quizzes = await QuizModel.find({ deleted: null })
+    .sort("vkUserId")
     .populate({
       path: "questions",
       populate: {
@@ -184,6 +184,8 @@ const main = async () => {
       path: "friends",
       match: { finished: { $ne: null }, lastStep: 10 },
     })
+    .skip(offset)
+    .limit(limit)
     .exec();
 
   for await (const quiz of quizzes) {
@@ -200,6 +202,28 @@ const main = async () => {
     //   ),
     // });
     console.debug(green("Completly saved quiz and friends"));
+  }
+};
+
+const main = async () => {
+  const ad = QuizAnswerModel;
+  const adf = QuizFriendModel;
+  const adq = QuizQuestionModel;
+  console.log(red("Big data query"));
+  const amountOfQuizzes = await QuizModel.find({
+    deleted: null,
+  }).countDocuments();
+  console.log(red("amountOfQuizzes"), amountOfQuizzes);
+
+  let offset = 0;
+  let notProcessed = amountOfQuizzes;
+
+  while (offset !== amountOfQuizzes) {
+    console.log(red("batch"), offset);
+    await batchQuiz(offset);
+    offset += notProcessed < limit ? notProcessed : limit;
+    notProcessed -= notProcessed < limit ? notProcessed : limit;
+    console.log(red("batch to next "), offset, notProcessed);
   }
 
   console.log("FINISHED");

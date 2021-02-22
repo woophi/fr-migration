@@ -8,8 +8,8 @@ import { Pool } from "pg";
 import { createWriteStream } from "fs";
 import { blue, green, red } from "chalk";
 const pool = new Pool({
-  // connectionString:
-  //   "postgresql://postgres:a@localhost:5432/testfriendship?schema=public",
+  connectionString:
+    "postgresql://postgres:a@localhost:5432/testfriendship?schema=public",
 });
 
 connect("mongodb://localhost:27017/vk-friends", {
@@ -143,9 +143,8 @@ const insertIntoPGDb = async (quiz: QuizType) => {
       }
     }
 
-    // await client.query("COMMIT");
-    await client.query("ROLLBACK");
-    console.log(red("ROLLBACK"));
+    await client.query("COMMIT");
+    console.log(red("COMMIT"));
     const resultStream = createWriteStream("success", { flags: "a" });
     resultStream.once("open", function (fd) {
       resultStream.write(`${quiz._id}` + "\r\n");
@@ -190,17 +189,17 @@ const batchQuiz = async (offset: number) => {
 
   for await (const quiz of quizzes) {
     console.debug(green("Engage to save quiz"));
-    // await insertIntoPGDb({
-    //   _id: quiz._id,
-    //   deleted: quiz.deleted,
-    //   firstName: quiz.firstName,
-    //   lastName: quiz.lastName,
-    //   questions: quiz.questions,
-    //   vkUserId: quiz.vkUserId,
-    //   friends: quiz.friends.filter(
-    //     (f) => Object.values(f.answers ?? {}).length === 10
-    //   ),
-    // });
+    await insertIntoPGDb({
+      _id: quiz._id,
+      deleted: quiz.deleted,
+      firstName: quiz.firstName,
+      lastName: quiz.lastName,
+      questions: quiz.questions,
+      vkUserId: quiz.vkUserId,
+      friends: quiz.friends.filter(
+        (f) => Object.values(f.answers ?? {}).length === 10
+      ),
+    });
     console.debug(green("Completly saved quiz and friends"));
   }
 };

@@ -8,8 +8,8 @@ import { Pool } from "pg";
 import { createWriteStream } from "fs";
 import { blue, green, red } from "chalk";
 const pool = new Pool({
-  connectionString:
-    "postgresql://postgres:a@localhost:5432/testfriendship?schema=public",
+  // connectionString:
+  //   "postgresql://postgres:a@localhost:5432/testfriendship?schema=public",
 });
 
 connect("mongodb://localhost:27017/vk-friends", {
@@ -188,17 +188,17 @@ const main = async () => {
 
   for await (const quiz of quizzes) {
     console.debug(green("Engage to save quiz"));
-    await insertIntoPGDb({
-      _id: quiz._id,
-      deleted: quiz.deleted,
-      firstName: quiz.firstName,
-      lastName: quiz.lastName,
-      questions: quiz.questions,
-      vkUserId: quiz.vkUserId,
-      friends: quiz.friends.filter(
-        (f) => Object.values(f.answers ?? {}).length === 10
-      ),
-    });
+    // await insertIntoPGDb({
+    //   _id: quiz._id,
+    //   deleted: quiz.deleted,
+    //   firstName: quiz.firstName,
+    //   lastName: quiz.lastName,
+    //   questions: quiz.questions,
+    //   vkUserId: quiz.vkUserId,
+    //   friends: quiz.friends.filter(
+    //     (f) => Object.values(f.answers ?? {}).length === 10
+    //   ),
+    // });
     console.debug(green("Completly saved quiz and friends"));
   }
 

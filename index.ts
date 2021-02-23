@@ -7,6 +7,8 @@ import * as moment from "moment";
 import { Pool } from "pg";
 import { createWriteStream } from "fs";
 import { blue, green, red } from "chalk";
+import { EmojiReplace } from "./schema/names";
+
 const pool = new Pool({
   connectionString:
     "postgresql://postgres:a@localhost:5432/testfriendship?schema=public",
@@ -64,7 +66,7 @@ const insertIntoPGDb = async (quiz: QuizType) => {
 
         const questionAnswerId = (
           await client.query(newPgQuestionAnswerQuery, [
-            answerData.emoji,
+            EmojiReplace[answerData.emoji] ?? answerData.emoji,
             answerData.text,
             quizQuestionId,
           ])

@@ -158,7 +158,7 @@ const insertIntoPGDb = async (quiz: QuizType) => {
     resultStream.once("open", function (fd) {
       resultStream.write(`${quiz._id}` + "\r\n");
     });
-    throw e;
+    console.error(red("ERROR"), e);
   } finally {
     client.release();
   }
@@ -185,6 +185,7 @@ const batchQuiz = async (offset: number) => {
       path: "friends",
       match: { finished: { $ne: null }, lastStep: 10 },
     })
+    .distinct("vkUserId")
     .skip(offset)
     .limit(limit)
     .exec();
